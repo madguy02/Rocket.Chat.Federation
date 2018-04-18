@@ -1,16 +1,16 @@
-var net = require('net');
-var fs = require('fs');
-var http = require('http');
-var Skiff = require('skiff');
-var MongoClient = require('mongodb').MongoClient;
+var net = require("net");
+var fs = require("fs");
+var http = require("http");
+var Skiff = require("skiff");
+var MongoClient = require("mongodb").MongoClient;
 var url = "mongodb://localhost:8182/meteor";
-var topology = require('fully-connected-topology');
-var networkAddress = require('network-address');
-var lpmessage = require('length-prefixed-message');
+var topology = require("fully-connected-topology");
+var networkAddress = require("network-address");
+var lpmessage = require("length-prefixed-message");
 var varint = require('varint');
-var t1 = topology('127.0.0.1:4001', ['127.0.0.1:4002', '127.0.0.1:4003']);
-t1.on('connection', function(connection, peer) {
-  console.log('t1 is connected to', peer);
+var t1 = topology("127.0.0.1:4001", ["127.0.0.1:4002", "127.0.0.1:4003"]);
+t1.on("connection", function(connection, peer) {
+  console.log("t1 is connected to", peer);
 });
 // const options = {
 //   db: require('memdown'), // in memory database
@@ -49,14 +49,14 @@ t1.on('connection', function(connection, peer) {
 var server = net.createServer( Meteor.bindEnvironment( function ( socket ) {
 //socket.write("Hi welcome to federation");
   socket.addListener( "data", Meteor.bindEnvironment( function ( data ) {
-	var val = data.toString('utf8').replace("PUT /channel/general HTTP/1.1","").replace("Content-Type: application/json","")
+	var val = data.toString("utf8").replace("PUT /channel/general HTTP/1.1","").replace("Content-Type: application/json","")
 			.replace(/^[0-9]*$/gm,"").replace("Transfer-Encoding: chunked","").replace("Host: localhost:5001","").replace("Connection: close","").replace("Host:localhost:01","").replace("1f","")
 			.replace(" ","");
 	//var doc = JSON.parse(val);
 	console.log(val);
 	//socket.pipe(data);
-	var writerStream = fs.createWriteStream('/home/madguy02/Desktop/rclog.txt');
-	writerStream.write(val,'UTF8');
+	var writerStream = fs.createWriteStream("/home/madguy02/Desktop/rclog.txt");
+	writerStream.write(val,"UTF8");
 	//var content = fs.appendFileSync('', val);
 	MongoClient.connect(url, function(err, db) {
   	if (err) throw err;
