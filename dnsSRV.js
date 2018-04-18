@@ -1,17 +1,17 @@
-var net = require('net');
-var http = require('http');
-var fs = require('fs');
+var net = require("net");
+var http = require("http");
+var fs = require("fs");
 var stdin = process.openStdin();
-var topology = require('fully-connected-topology');
-var jsonStream = require('duplex-json-stream');
+var topology = require("fully-connected-topology");
+var jsonStream = require("duplex-json-stream");
 var data = '';
-var streamSet = require('stream-set');
+var streamSet = require("stream-set");
 var me = process.argv[2];
 var peers = process.argv.slice(3);
 var swarm = topology(me,peers);
 var streams = streamSet();
-var request = require('request');
-var express = require('express');
+var request = require("request");
+var express = require("express");
 
 
 
@@ -26,17 +26,17 @@ console.log('connected');
 
 //});
 
-swarm.on('connection', function(socket) {
-  console.log(peers+'[a peer joined]');
+swarm.on("connection", function(socket) {
+  console.log(peers+"[a peer joined]");
   socket = jsonStream(socket);
   streams.add(socket);
-  socket.on('data',function(data){
+  socket.on("data",function(data){
 
 	var params = {
-	host: 'localhost',
+	host: "localhost",
 	port: 8181,
-	path: '/api/v1/users.register',
-	method: 'POST'
+	path: "/api/v1/users.register",
+	method: "POST"
 
 };
 var jsondata;
@@ -47,8 +47,8 @@ var req = http.request(params, function(res) {
   //console.log('STATUS: ' + res.statusCode);
   //console.log('HEADERS: ' + JSON.stringify(res.headers));
   //res.setEncoding('utf8');
-  res.on('data', function (chunk) {
-     jsondata = chunk.toString('utf8');
+  res.on("data", function (chunk) {
+     jsondata = chunk.toString("utf8");
      parsedjsondata = (JSON.parse(jsondata));
      console.log(parsedjsondata);
      userId = parsedjsondata.user._id;
@@ -58,8 +58,8 @@ var req = http.request(params, function(res) {
   });
 });
 
-req.on('error', function(e) {
-  console.log('problem with request: ' + e.message);
+req.on("error", function(e) {
+  console.log("problem with request: " + e.message);
 });
 
 req.write(JSON.stringify({"username": "manish.localhost.3000"/*data.username.replace(":",".")*/, "email":data.email +"@gmail.com", "pass": data.pass, "name": data.name}));
@@ -67,10 +67,10 @@ req.end();
 
 
 var login = {
-host: 'localhost',
+host: "localhost",
 	port: 8181,
-	path: '/api/v1/login',
-	method: 'POST'
+	path: "/api/v1/login",
+	method: "POST"
 };
 
 var jsondata1;
@@ -79,8 +79,8 @@ var userId1;
 var token1;
 setTimeout(function() {
 var loginreq = http.request(login, function(res) {
-  res.on('data', function (chunk) {
-   jsondata1 = chunk.toString('utf8');
+  res.on("data", function (chunk) {
+   jsondata1 = chunk.toString("utf8");
   parsedjsondata1 = (JSON.parse(jsondata1));
   console.log(parsedjsondata1);
   userId1 = parsedjsondata1.data.userId;
@@ -103,24 +103,24 @@ var newheaders = {
 console.log(newheaders);
 
 var sendMessage = {
-  host: 'localhost',
+  host: "localhost",
   port: 8181,
-  path: '/api/v1/chat.postMessage',
-  method: 'POST',
+  path: "/api/v1/chat.postMessage",
+  method: "POST",
   headers: newheaders
 }
 
 var sendMessagereq = http.request(sendMessage, function(res){
-  res.setEncoding('utf8');
-  res.on('data', function (chunk) {
-    console.log('BODY: ' + chunk);
+  res.setEncoding("utf8");
+  res.on("data", function (chunk) {
+    console.log("BODY: " + chunk);
   });
 });
 
 sendMessagereq.write(JSON.stringify({"channel": "#general", "text": "This is a test for federation!"}));
 sendMessagereq.end();
 }, 9000);
-    console.log(data.username + '>' + data.message);
+    console.log(data.username + ">" + data.message);
   })
 })
 
@@ -142,27 +142,27 @@ console.log("You:"+bodyString);
 
 
 var headers = {
-    'Content-Type': 'application/json'
+    "Content-Type": "application/json"
 };
 
 var options = {
-host: 'localhost',
-path: '/channel/general',
+host: "localhost",
+path: "/channel/general",
 port: 6001,
-method: 'PUT',
+method: "PUT",
 headers: headers
 };
 
 var callback = function(response) {
-var str = 'localhost';
+var str = "localhost";
 
-response.on('data', function(chunk) {
+response.on("data", function(chunk) {
 str += chunk;
 });
 
-response.removeHeader('Content-Type');
-response.removeHeader('Host');
-response.removeHeader('Connection');
+response.removeHeader("Content-Type");
+response.removeHeader("Host");
+response.removeHeader("Connection");
 
 };
 
@@ -186,8 +186,8 @@ http.request(options, callback).write(bodyString);
 
 //});
 
-client.on('data', function(data) {
-console.log(data.toString('utf8'));
+client.on("data", function(data) {
+console.log(data.toString("utf8"));
 //client.write('{"name": "manish", "age": "934", "channel": "general", "serverName": "myServer", "msg": "Say hello"}');
 
 });
