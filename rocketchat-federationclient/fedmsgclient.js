@@ -1,8 +1,6 @@
-Comments = new Mongo.Collection('rocketchat_federationmessage');
+Comments = new Mongo.Collection("rocketchat_federationmessage");
 
-
-
-  Meteor.subscribe('rocketchat_federationmessage');
+  Meteor.subscribe("rocketchat_federationmessage");
 
 
   Template.federation.helpers({
