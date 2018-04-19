@@ -16,7 +16,13 @@
     "url": "https://github.com/rocketchat/Rocket.Chat.Federation/issues"
   },
   "homepage": "https://github.com/rocketchat/Rocket.Chat.Federation",
-  "dependencies": {
-    
+  "dependencies": {},
+  "devDependencies": {
+    "duplex-json-stream": "^1.0.1",
+    "express": "^4.16.3",
+    "fully-connected-topology": "^1.1.1",
+    "http": "0.0.0",
+    "net": "^1.0.2",
+    "request": "^2.85.0"
   }
 }
