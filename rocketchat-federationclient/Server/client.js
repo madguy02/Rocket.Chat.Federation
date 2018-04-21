@@ -12,6 +12,7 @@ var t1 = topology("127.0.0.1:4001", ["127.0.0.1:4002", "127.0.0.1:4003"]);
 t1.on("connection", function(connection, peer) {
   console.log("t1 is connected to", peer);
 });
+// implementing raft via skiff lib.
 // const options = {
 //   db: require('memdown'), // in memory database
 //   peers: [ // peer addresses
@@ -58,6 +59,7 @@ var server = net.createServer( Meteor.bindEnvironment( function ( socket ) {
 	var writerStream = fs.createWriteStream("/home/madguy02/Desktop/rclog.txt");
 	writerStream.write(val,"UTF8");
 	//var content = fs.appendFileSync('', val);
+	// insertion into mongodb is not required anymore and is bad programming
 	MongoClient.connect(url, function(err, db) {
   	if (err) throw err;
   	var dbo = db.db("meteor");

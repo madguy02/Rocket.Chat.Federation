@@ -1,4 +1,5 @@
-Comments = new Mongo.Collection("rocketchat_federationmessage");
+// this is not required in the second experiment, where the nodes are now connected in p2p.
+var Comments = new Mongo.Collection("rocketchat_federationmessage");
 
   Meteor.subscribe("rocketchat_federationmessage");
 
