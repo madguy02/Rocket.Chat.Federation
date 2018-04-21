@@ -4,7 +4,7 @@ var fs = require("fs");
 var stdin = process.openStdin();
 var topology = require("fully-connected-topology");
 var jsonStream = require("duplex-json-stream");
-var data = '';
+var data = " ";
 var streamSet = require("stream-set");
 var me = process.argv[2];
 var peers = process.argv.slice(3);
@@ -16,8 +16,8 @@ var express = require("express");
 
 
 var client = new net.Socket();
-client.connect(6001, '127.0.0.1', function() {
-console.log('connected');
+client.connect(6001, "127.0.0.1", function() {
+console.log("connected");
 
 //fs.watchFile('/home/madguy02/Desktop/rclog.txt', function() {
 //console.log('updating messages....');
@@ -50,11 +50,11 @@ var req = http.request(params, function(res) {
   res.on("data", function (chunk) {
      jsondata = chunk.toString("utf8");
      parsedjsondata = (JSON.parse(jsondata));
-     console.log(parsedjsondata);
+     // console.log(parsedjsondata);
      userId = parsedjsondata.user._id;
-    console.log(userId);
+    // console.log(userId);
      token = parsedjsondata.user.services.email.verificationTokens[0].token;
-    console.log(token);
+    // console.log(token);
   });
 });
 
@@ -82,11 +82,11 @@ var loginreq = http.request(login, function(res) {
   res.on("data", function (chunk) {
    jsondata1 = chunk.toString("utf8");
   parsedjsondata1 = (JSON.parse(jsondata1));
-  console.log(parsedjsondata1);
+  // console.log(parsedjsondata1);
   userId1 = parsedjsondata1.data.userId;
- //console.log(userId1);
+ // console.log(userId1);
   token1 = parsedjsondata1.data.authToken;
- //console.log(token1);
+ // console.log(token1);
   });
 });
 
@@ -100,7 +100,7 @@ var newheaders = {
   "X-User-Id": ""+userId1,
   "Content-type":"application/json"
 }
-console.log(newheaders);
+// console.log(newheaders);
 
 var sendMessage = {
   host: "localhost",
@@ -113,14 +113,14 @@ var sendMessage = {
 var sendMessagereq = http.request(sendMessage, function(res){
   res.setEncoding("utf8");
   res.on("data", function (chunk) {
-    console.log("BODY: " + chunk);
+    // console.log("BODY: " + chunk); // if required then uncomment
   });
 });
 
 sendMessagereq.write(JSON.stringify({"channel": "#general", "text": "This is a test for federation!"}));
 sendMessagereq.end();
 }, 9000);
-    console.log(data.username + ">" + data.message);
+     console.log(data.username + ">" + data.message);
   })
 })
 
@@ -130,15 +130,15 @@ sendMessagereq.end();
 //socket.write({user: "localhost:1002", email: info.toString().trim(), pass: info.toString().trim(), name: "homie"})
 //});
 
-console.log("Send a message: ");
+// console.log("Send a message: "); // if required, uncomment the console.log
 stdin.addListener("data", function(d) {
 streams.forEach(function(socket) {
 socket.write({username: me, message: d.toString().trim(), email: d.toString().trim(), pass: d.toString().trim(), name: "homie" });
 });
 
-console.log("you entered:"  +d.toString("utf8"));
+// console.log("you entered:"  +d.toString("utf8")); // if required, uncomment it
 var bodyString = JSON.stringify({username: me, message: d.toString().trim()}) ;
-console.log("You:"+bodyString);
+// console.log("You:"+bodyString); // if required, uncomment
 
 
 var headers = {
@@ -187,7 +187,7 @@ http.request(options, callback).write(bodyString);
 //});
 
 client.on("data", function(data) {
-console.log(data.toString("utf8"));
+// console.log(data.toString("utf8")); // if required, uncomment
 //client.write('{"name": "manish", "age": "934", "channel": "general", "serverName": "myServer", "msg": "Say hello"}');
 
 });
