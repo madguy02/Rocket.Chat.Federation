@@ -7,11 +7,11 @@ var url = "mongodb://localhost:8182/meteor";
 var topology = require("fully-connected-topology");
 var networkAddress = require("network-address");
 var lpmessage = require("length-prefixed-message");
-var varint = require('varint');
-var t1 = topology("127.0.0.1:4001", ["127.0.0.1:4002", "127.0.0.1:4003"]);
-t1.on("connection", function(connection, peer) {
-  console.log("t1 is connected to", peer);
-});
+var varint = require("varint");
+// var t1 = topology("127.0.0.1:4001", ["127.0.0.1:4002", "127.0.0.1:4003"]);
+// t1.on("connection", function(connection, peer) {
+  //console.log("t1 is connected to", peer);
+// });
 // implementing raft via skiff lib.
 // const options = {
 //   db: require('memdown'), // in memory database

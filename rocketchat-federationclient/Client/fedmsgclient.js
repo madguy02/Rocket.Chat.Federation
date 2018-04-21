@@ -6,7 +6,7 @@ var Comments = new Mongo.Collection("rocketchat_federationmessage");
 
   Template.federation.helpers({
     federationmessage: function () {
-	console.log(Comments.find({}).fetch());
+	// console.log(Comments.find({}).fetch());
       return Comments.find({}).fetch();
   }
       
