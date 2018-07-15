@@ -33,14 +33,19 @@ var streams = streamSet();
 // socket.write({username: me, message: data.toString().trim()})
 // });
 // }));
-
+var msgId = ""; //not sure about globalizing this
+var msg = ""; // same here
 MongoClient.connect(url, function(err,db){
 if(err) throw err;
 var dbo = db.db("meteor");
-var query= dbo.collection("rocketchat_message").find().sort({$natural:-1}).limit(1).toArray(function(err, result){
+dbo.collection("rocketchat_message").find().sort({$natural:-1}).limit(1).toArray(function(err, result){
 	if (err) throw Error;
 	else {
-		console.log(result);
+		//console.log(result);
+		var DbParsedData = JSON.parse(JSON.stringify(result));
+		 msgId = DbParsedData[0]._id;
+			msg = DbParsedData[0].msg;
+			
 	}
 	db.close();
 });
