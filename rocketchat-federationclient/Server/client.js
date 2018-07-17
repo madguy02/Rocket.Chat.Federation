@@ -9,58 +9,19 @@ var lpmessage = require('length-prefixed-message');
 var jsonStream = require('duplex-json-stream');
 var streamSet = require('stream-set');
 var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:3001/meteor";
+var url = "mongodb://localhost:8182/meteor";
 var stdin = process.openStdin();
 var circularJson = require("circular-json");
 
-var me = 'localhost:6000';
-var peers = 'localhost:3003';
+var me = 'localhost:3003';
+var peers = 'localhost:6000';
 var swarm = topology(me,peers);
 var streams = streamSet();
 
-// swarm.on('connection', function(socket) {
-//   console.log(peers + '[peer joined]');
-//   socket = jsonStream(socket);
-//   streams.add(socket);
-//   socket.on('data',function(data){
-//     // console.log('scsh');
-//     console.log(data.username + '>' + data.message);
-//   })
-// })
-
-// stdin.addListener('data',Meteor.bindEnvironment(function(socket){
-// streams.forEach(function(socket) {
-// socket.write({username: me, message: data.toString().trim()})
-// });
-// }));
-// var msgId = ""; //not sure about globalizing this
-// var msg = ""; // same here
-// MongoClient.connect(url, function(err,db){
-// if(err) throw err;
-// var dbo = db.db("meteor");
-// dbo.collection("rocketchat_message").find().sort({$natural:-1}).limit(1).toArray(function(err, result){
-// 	if (err) throw Error;
-// 	else {
-// 		//console.log(result);
-// 		var DbParsedData = JSON.parse(JSON.stringify(result));
-// 		 msgId = DbParsedData[0]._id;
-// 			msg = DbParsedData[0].msg;
-			
-// 	}
-// 	db.close();
-// });
-
-// }); // this is work in progess...
-
-
-// var t2 = topology('127.0.0.1:4002', ['127.0.0.1:4001', '127.0.0.1:4003']);
-//
-// t2.on('connection', function(connection, peer) {
-//   console.log('t2 is connected to', peer);
-// });
 
 var server = net.createServer( Meteor.bindEnvironment( function ( socket ) {
 //socket.write("Hi welcome to federation");
+socket.write("handshake");
   socket.addListener( "data", Meteor.bindEnvironment( function ( data ) {
 var val = data.toString('utf8').replace("PUT /channel/general HTTP/1.1","").replace("Content-Type: application/json","")
 .replace(/^[0-9]*$/gm,"").replace("Transfer-Encoding: chunked","").replace("Host: localhost:6001","").replace("Connection: close","").replace("2e","").replace(" ","");
@@ -88,10 +49,10 @@ var val = data.toString('utf8').replace("PUT /channel/general HTTP/1.1","").repl
     //var content = fs.writeFileSync('/home/madguy02/Desktop/rclog.txt', doc.msg);
 
   } ) )
-} ) ).listen(6001);
+} ) ).listen(5001);
 
 var client = new net.Socket();
-client.connect(6001, '127.0.0.1', function() {
+client.connect(5001, '127.0.0.1', function() {
 console.log('connected this one');
 
 //fs.watchFile('/home/madguy02/Desktop/rclog.txt', function() {
@@ -106,14 +67,14 @@ swarm.on('connection', function(socket) {
   socket = jsonStream(socket);
   streams.add(socket);
   streams.forEach(function(socket) {
-	socket.write("handshake");
+	socket.write({"username": "testUser012","name": "testUser012", "pass": "blahblah"});
 	});
-
-  socket.on('data',function(data){
 	
+  socket.on('data',function(data){
+
 	var params = {
 	host: 'localhost',
-	port: 8181,
+	port: 3000,
 	path: '/api/v1/users.register',
 	method: 'POST'
 
@@ -127,7 +88,8 @@ var req = http.request(params, function(res) {
   //console.log('HEADERS: ' + JSON.stringify(res.headers));
   //res.setEncoding('utf8');
   res.on('data', function (chunk) {
-     jsondata = chunk.toString('utf8');
+	 jsondata = chunk.toString('utf8');
+	 console.log(jsondata);
      parsedjsondata = (JSON.parse(jsondata));
      console.log(parsedjsondata);
      userId = parsedjsondata.user._id;
@@ -141,13 +103,13 @@ req.on('error', function(e) {
   console.log('problem with request: ' + e.message);
 });
 
-req.write(JSON.stringify({"username": "testuser020.localhost.8181"/*data.username.replace(":",".")*/, "email":data.email +"@gmail.com", "pass": data.pass, "name": data.name}));
+req.write(JSON.stringify({"username": "testUser012"/*data.username.replace(":",".")*/, "email": "testUser@gmail.com", "pass": "password", "name": "homie"}));
 req.end();
 
 
 var login = {
 host: 'localhost',
-	port: 8181,
+	port: 3000,
 	path: '/api/v1/login',
 	method: 'POST'
 };
@@ -169,7 +131,7 @@ var loginreq = http.request(login, function(res) {
   });
 });
 
-loginreq.write(JSON.stringify({ "username": "testuser020.localhost.8181", "password": "goyakela" }));
+loginreq.write(JSON.stringify({ "username": "testUser012", "password": "password" }));
 loginreq.end();
 }, 6000);
 
@@ -204,7 +166,7 @@ console.log(newheaders);
 
 var sendMessage = {
   host: 'localhost',
-  port: 8181,
+  port: 3000,
   path: '/api/v1/chat.postMessage',
   method: 'POST',
   headers: newheaders
@@ -247,7 +209,7 @@ sendMessagereq.end();
 	
 	var getMessage = {
 		host: 'localhost',
-		port: 8181,
+		port: 3000,
 		path: '/api/v1/chat.getMessage',
 		method: 'GET',
 		headers: newheaders
@@ -280,7 +242,7 @@ sendMessagereq.end();
 //});
 
 //console.log("Send a message: ");
-//stdin.addListener("data", function(d) {
+stdin.addListener("data", function(d) {
 // streams.forEach(function(socket) {
 // socket.write({username: me, message: d.toString().trim(), email: d.toString().trim(), pass: d.toString().trim(), name: "homie" });
 // });
@@ -290,37 +252,40 @@ sendMessagereq.end();
 // console.log("You:"+bodyString);
 
 
-// var headers = {
-//     'Content-Type': 'application/json'
-// };
+var headers = {
+    'Content-Type': 'application/json'
+};
 
-// var options = {
-// host: 'localhost',
-// path: '/channel/general',
-// port: 3000,
-// method: 'PUT',
-// headers: headers
-// };
+var options = {
+host: 'localhost',
+path: '/channel/general',
+port: 3000,
+method: 'PUT',
+headers: headers
+};
 
-// var callback = function(response) {
-// var str = 'localhost';
+var callback = function(response) {
+var str = 'localhost';
 
-// response.on('data', function(chunk) {
-// str += chunk;
-// });
+response.on('data', function(chunk) {
+str += chunk;
+});
 
-// response.removeHeader('Content-Type');
-// response.removeHeader('Host');
-// response.removeHeader('Connection');
+response.removeHeader('Content-Type');
+response.removeHeader('Host');
+response.removeHeader('Connection');
 
-// };
+};
 
-// http.request(options, callback).write(bodyString);
+http.request(options, callback).write(bodyString);
+//socket.write("handshake");
+
+});
+
+});
 
 
-// });
 
-// });
 //setTimeout(function(){
 //fs.readFile('/home/madguy02/Desktop/rclog1.txt','utf-8',function(err,content){
 //console.log(content);
@@ -335,9 +300,9 @@ sendMessagereq.end();
 
 //});
 
-// client.on('data', function(data) {
-// console.log(data.toString('utf8'));
-socket.write("handshake");
+client.on('data', function(data) {
+console.log(data.toString('utf8'));
+//client.write('{"name": "manish", "age": "934", "channel": "general", "serverName": "myServer", "msg": "Say hello"}');
 
 });
 
