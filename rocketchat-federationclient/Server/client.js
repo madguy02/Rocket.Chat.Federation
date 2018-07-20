@@ -9,46 +9,51 @@ var lpmessage = require('length-prefixed-message');
 var jsonStream = require('duplex-json-stream');
 var streamSet = require('stream-set');
 var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:8182/meteor";
+var url = "mongodb://127.0.0.1:8182";
 var stdin = process.openStdin();
 var circularJson = require("circular-json");
-
+var MongoOplog = require('mongo-oplog');
 var me = 'localhost:3003';
 var peers = 'localhost:6000';
 var swarm = topology(me,peers);
 var streams = streamSet();
+var MongoStream = require('mongo-trigger');
+var watcher = new MongoStream({format: 'pretty'});
+const oplog = MongoOplog('mongodb://127.0.0.1:8182/local', { ns: 'meteor.rocketchat_message' })
 
+oplog.tail();
 
 var server = net.createServer( Meteor.bindEnvironment( function ( socket ) {
 //socket.write("Hi welcome to federation");
-socket.write("handshake");
-  socket.addListener( "data", Meteor.bindEnvironment( function ( data ) {
-var val = data.toString('utf8').replace("PUT /channel/general HTTP/1.1","").replace("Content-Type: application/json","")
-.replace(/^[0-9]*$/gm,"").replace("Transfer-Encoding: chunked","").replace("Host: localhost:6001","").replace("Connection: close","").replace("2e","").replace(" ","");
+// socket.write("handshake");
+//   socket.addListener( "data", Meteor.bindEnvironment( function ( data ) {
+// var val = data.toString('utf8').replace("PUT /channel/general HTTP/1.1","").replace("Content-Type: application/json","")
+// .replace(/^[0-9]*$/gm,"").replace("Transfer-Encoding: chunked","").replace("Host: localhost:6001","").replace("Connection: close","").replace("2e","").replace(" ","");
 
 	//var doc = JSON.parse(val);
-	console.log(val);
-	//socket.pipe(data);
-	var writerStream = fs.createWriteStream('/home/madguy02/Desktop/rclog1.txt');
-	writerStream.write(val,'UTF8');
-	MongoClient.connect(url, function(err, db) {
-  	if (err) throw err;
-  	var dbo = db.db("meteor");
-  	var myobj = JSON.parse(val);
-	//console.log(myobj);
-	//dbo.collection("rocketchat_message").find().limit(1).sort({$natural:-1});
-  	// dbo.collection("rocketchat_message").insert(myobj, function(err, res) {
-    // 	if (err) throw err;
-    // 	console.log("1 document inserted");
-    	db.close();
-  //});
-});
+	// MongoClient.connect(url, function(err,db){
+	// console.log("HELP");
+	// var dbo = db.db("local");
+	// var change_streams = dbo.collection("rocketchat_message").watch();
+	// 	//if (err) throw Error;
+	// 	//else {
+	// 		//console.log(result);
+	// 		change_streams.on('change', function(change){
+	// 			console.log("QWERTY");
+	// 			console.log(JSON.stringify("ADERT"+change));
+	// 			Federation();
+	// 		  });
+		//}
+		//db.close();
+	
+	//});
 
 
+	
 //});
     //var content = fs.writeFileSync('/home/madguy02/Desktop/rclog.txt', doc.msg);
 
-  } ) )
+ // } ) )
 } ) ).listen(5001);
 
 var client = new net.Socket();
@@ -60,18 +65,20 @@ console.log('connected this one');
 //var file = fs.readFileSync('/home/madguy02/Desktop/rclog1.txt');
 //console.log('Message Received: '+ 'at: '+new Date() + file);
 
-//});
+
+
 
 swarm.on('connection', function(socket) {
   console.log(peers+'[a peer joined]');
   socket = jsonStream(socket);
   streams.add(socket);
   streams.forEach(function(socket) {
-	socket.write({"username": "testUser012","name": "testUser012", "pass": "blahblah"});
-	});
 	
-  socket.on('data',function(data){
-
+socket.write({"username": "testUser012","name": "testUser012", "pass": "blahblah"});
+			})
+		
+  //socket.on('data',function(data){
+	function Federation() {
 	var params = {
 	host: 'localhost',
 	port: 3000,
@@ -140,17 +147,21 @@ var msg; // same here
 MongoClient.connect(url, function(err,db){
 	if(err) throw err;
 	var dbo = db.db("meteor");
-	dbo.collection("rocketchat_message").find().sort({$natural:-1}).limit(1).toArray(function(err, result){
-		if (err) throw Error;
-		else {
-			//console.log(result);
-			var DbParsedData = JSON.parse(JSON.stringify(result));
-			 //msgId = DbParsedData[0]._id;
-				msg = DbParsedData[0].msg;
-				console.log("FFFFFFFF"+msg);
+				dbo.collection("rocketchat_message").find().sort({$natural: -1}).limit(3).toArray(function(err, result){
+					if (err) throw Error;
+					else {
+						//console.log(result);
+						
+						var DbParsedData = JSON.parse(JSON.stringify(result));
+						 //msgId = DbParsedData[0]._id;
+							msg = DbParsedData[0].msg;
+							console.log("FFFFFFFF"+msg);
+						
+					}
 				
-		}
-		db.close();
+			  //});
+	
+		//db.close();
 	});
 	});
 
@@ -189,43 +200,24 @@ var sendMessagereq = http.request(sendMessage, function(res){
 sendMessagereq.end();
 }, 9000);
 
-    console.log(data.username + '>' + data.message);
-  })
+    //console.log(data.username + '>' + data.message);
+  //})
+
+//})
+}
+
+oplog.on('insert', function(doc){
+	
+	console.log(doc);
+	Federation();
+	
 })
 
 
-//console.log(getMessagereq);
-
-//console.log("outer-scope"+msg);
 
 
-
-	// var new1headers = {
-	// 	"X-Auth-Token": ""+token1,
-	// 	"X-User-Id": ""+userId1,
-	// 	"Content-type":"application/json"
-	// }
-	//console.log(new1headers);
 	
-	var getMessage = {
-		host: 'localhost',
-		port: 3000,
-		path: '/api/v1/chat.getMessage',
-		method: 'GET',
-		headers: newheaders
-	}
-	
-	// var getMessagereq = http.request(getMessage, function(res){
-	// 	res.setEncoding('utf8');
-	// 	res.on('data', function (chunk) {
-	// 		console.log('getmessage: ' + chunk);
-	// 	});
-	// });
-	//getMessagereq.end();
-	http.request(getMessage, function(err, res, body){
-		console.log("WORKING: "+body);
-	})
-
+//Federation();
 //console.log(data.message);
 	
 	// sendMessagereq.write(JSON.stringify({"channel": "#general", "text": "This is a test for federation!"}));
@@ -242,47 +234,8 @@ sendMessagereq.end();
 //});
 
 //console.log("Send a message: ");
-stdin.addListener("data", function(d) {
-// streams.forEach(function(socket) {
-// socket.write({username: me, message: d.toString().trim(), email: d.toString().trim(), pass: d.toString().trim(), name: "homie" });
-// });
-
-// console.log("you entered:"  +d.toString("utf8"));
-// var bodyString = JSON.stringify({username: me, message: d.toString().trim()}) ;
-// console.log("You:"+bodyString);
 
 
-var headers = {
-    'Content-Type': 'application/json'
-};
-
-var options = {
-host: 'localhost',
-path: '/channel/general',
-port: 3000,
-method: 'PUT',
-headers: headers
-};
-
-var callback = function(response) {
-var str = 'localhost';
-
-response.on('data', function(chunk) {
-str += chunk;
-});
-
-response.removeHeader('Content-Type');
-response.removeHeader('Host');
-response.removeHeader('Connection');
-
-};
-
-http.request(options, callback).write(bodyString);
-//socket.write("handshake");
-
-});
-
-});
 
 
 
@@ -298,11 +251,11 @@ http.request(options, callback).write(bodyString);
 //console.log(data);
 //},2000);
 
-//});
-
-client.on('data', function(data) {
-console.log(data.toString('utf8'));
-//client.write('{"name": "manish", "age": "934", "channel": "general", "serverName": "myServer", "msg": "Say hello"}');
+});
 
 });
 
+
+	//MONGO_OPLOG_URL=mongodb://oplogger:password@localhost:27017/local?authSource=admin
+
+	
