@@ -1,3 +1,5 @@
+// please don't remove commented code (as of now), they are yet to be planned
+
 var net = require('net');
 var fs = require('fs');
 var http = require('http');
@@ -17,8 +19,6 @@ var me = 'localhost:3003';
 var peers = 'localhost:6000';
 var swarm = topology(me,peers);
 var streams = streamSet();
-var MongoStream = require('mongo-trigger');
-var watcher = new MongoStream({format: 'pretty'});
 const oplog = MongoOplog('mongodb://127.0.0.1:8182/local', { ns: 'meteor.rocketchat_message' })
 
 oplog.tail();
@@ -48,7 +48,7 @@ var server = net.createServer( Meteor.bindEnvironment( function ( socket ) {
 	
 	//});
 
-
+ // This is yet to be planned
 	
 //});
     //var content = fs.writeFileSync('/home/madguy02/Desktop/rclog.txt', doc.msg);
@@ -78,7 +78,9 @@ socket.write({"username": "testUser012","name": "testUser012", "pass": "blahblah
 			})
 		
   //socket.on('data',function(data){
-	function Federation() {
+	//function Federation() {
+	oplog.on('insert', function(doc){
+				
 	var params = {
 	host: 'localhost',
 	port: 3000,
@@ -142,28 +144,29 @@ loginreq.write(JSON.stringify({ "username": "testUser012", "password": "password
 loginreq.end();
 }, 6000);
 
-var msgId; //not sure about globalizing this
-var msg; // same here
-MongoClient.connect(url, function(err,db){
-	if(err) throw err;
-	var dbo = db.db("meteor");
-				dbo.collection("rocketchat_message").find().sort({$natural: -1}).limit(3).toArray(function(err, result){
-					if (err) throw Error;
-					else {
-						//console.log(result);
+// var msgId; //not sure about globalizing this
+// var msg; // same here
+
+// MongoClient.connect(url, function(err,db){
+// 	if(err) throw err;
+// 	var dbo = db.db("meteor");
+// 				dbo.collection("rocketchat_message").find().sort({$natural: -1}).limit(3).toArray(function(err, result){
+// 					if (err) throw Error;
+// 					else {
+// 						//console.log(result);
 						
-						var DbParsedData = JSON.parse(JSON.stringify(result));
-						 //msgId = DbParsedData[0]._id;
-							msg = DbParsedData[0].msg;
-							console.log("FFFFFFFF"+msg);
+// 						var DbParsedData = JSON.parse(JSON.stringify(result));
+// 						 //msgId = DbParsedData[0]._id;
+// 							msg = DbParsedData[0].msg;
+// 							console.log("FFFFFFFF"+msg);
 						
-					}
+// 					}
 				
-			  //});
+// 			  //});
 	
-		//db.close();
-	});
-	});
+// 		//db.close();
+// 	});
+// 	});
 
 setTimeout(function(){
 var newheaders = {
@@ -193,10 +196,10 @@ var sendMessagereq = http.request(sendMessage, function(res){
 });
 
 
-
+console.log("A MESSAGE"+doc.o.msg);
 //});
  // this is work in progess...
- sendMessagereq.write(JSON.stringify({"channel": "#general", "text": msg}));
+ sendMessagereq.write(JSON.stringify({"channel": "#general", "text": doc.o.msg}));
 sendMessagereq.end();
 }, 9000);
 
@@ -204,52 +207,11 @@ sendMessagereq.end();
   //})
 
 //})
-}
+//}
+});
 
-oplog.on('insert', function(doc){
-	
-	console.log(doc);
-	Federation();
-	
-})
+// })
 
-
-
-
-	
-//Federation();
-//console.log(data.message);
-	
-	// sendMessagereq.write(JSON.stringify({"channel": "#general", "text": "This is a test for federation!"}));
-	// sendMessagereq.end();
-	// }, 9000);
-	// 		console.log(data.username + '>' + data.message);
-	// 	})
-	// })
-
-//console.log("Send your info to be added to server: ");
-//stdin.addListener("data", function(info) {
-//streams.forEach(function(socket) {
-//socket.write({user: "localhost:1002", email: info.toString().trim(), pass: info.toString().trim(), name: "homie"})
-//});
-
-//console.log("Send a message: ");
-
-
-
-
-
-//setTimeout(function(){
-//fs.readFile('/home/madguy02/Desktop/rclog1.txt','utf-8',function(err,content){
-//console.log(content);
-//});
-//var readerStream = fs.createReadStream('/home/madguy02/Desktop/rclog1.txt');
-//readerStream.setEncoding('utf8');
-//readerStream.on('data', function(chunk) {
-   //data += chunk;
-//});
-//console.log(data);
-//},2000);
 
 });
 
