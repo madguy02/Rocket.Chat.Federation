@@ -60,12 +60,6 @@ var client = new net.Socket();
 client.connect(5001, '127.0.0.1', function() {
 console.log('connected this one');
 
-//fs.watchFile('/home/madguy02/Desktop/rclog.txt', function() {
-//console.log('updating messages....');
-//var file = fs.readFileSync('/home/madguy02/Desktop/rclog1.txt');
-//console.log('Message Received: '+ 'at: '+new Date() + file);
-
-
 
 
 swarm.on('connection', function(socket) {
@@ -79,8 +73,10 @@ socket.write({"username": "testUser012","name": "testUser012", "pass": "blahblah
 		
   //socket.on('data',function(data){
 	//function Federation() {
+	
 	oplog.on('insert', function(doc){
-				
+	console.log(doc);
+		
 	var params = {
 	host: 'localhost',
 	port: 3000,
@@ -92,10 +88,8 @@ var jsondata;
 var parsedjsondata;
 var userId;
 var token;
+var email;
 var req = http.request(params, function(res) {
-  //console.log('STATUS: ' + res.statusCode);
-  //console.log('HEADERS: ' + JSON.stringify(res.headers));
-  //res.setEncoding('utf8');
   res.on('data', function (chunk) {
 	 jsondata = chunk.toString('utf8');
 	 console.log(jsondata);
@@ -103,7 +97,8 @@ var req = http.request(params, function(res) {
      console.log(parsedjsondata);
      userId = parsedjsondata.user._id;
     console.log(userId);
-     token = parsedjsondata.user.services.email.verificationTokens[0].token;
+	 token = parsedjsondata.user.services.email.verificationTokens[0].token;
+	 email = parsedjsondata.user.services.email.verificationTokens[1].address;
     console.log(token);
   });
 });
@@ -112,7 +107,7 @@ req.on('error', function(e) {
   console.log('problem with request: ' + e.message);
 });
 
-req.write(JSON.stringify({"username": "testUser012"/*data.username.replace(":",".")*/, "email": "testUser@gmail.com", "pass": "password", "name": "homie"}));
+req.write(JSON.stringify({"username": doc.o.u.username, "email": doc.o.u.username+"@gmail.com", "pass": "password", "name": doc.o.u.username}));
 req.end();
 
 
@@ -140,7 +135,7 @@ var loginreq = http.request(login, function(res) {
   });
 });
 
-loginreq.write(JSON.stringify({ "username": "testUser012", "password": "password" }));
+loginreq.write(JSON.stringify({ "username": doc.o.u.username, "password": "password" }));
 loginreq.end();
 }, 6000);
 
