@@ -15,11 +15,13 @@ var url = "mongodb://127.0.0.1:8182";
 var stdin = process.openStdin();
 var circularJson = require("circular-json");
 var MongoOplog = require('mongo-oplog');
+var url = require('url');
 var me = 'localhost:3003';
 var peers = 'localhost:6000';
 var swarm = topology(me,peers);
 var streams = streamSet();
 const oplog = MongoOplog('mongodb://127.0.0.1:8182/local', { ns: 'meteor.rocketchat_message' })
+var discovery = require('dns-discovery');
 
 oplog.tail();
 
@@ -55,12 +57,17 @@ var server = net.createServer( Meteor.bindEnvironment( function ( socket ) {
 
  // } ) )
 } ) ).listen(5001);
+console.log(server.address());
 
 var client = new net.Socket();
 client.connect(5001, '127.0.0.1', function() {
 console.log('connected this one');
-
-
+var disc = discovery();
+disc.lookup('example');
+disc.on('peer', function(name, peer){
+console.log(name);
+console.log(peer);
+//});
 
 swarm.on('connection', function(socket) {
   console.log(peers+'[a peer joined]');
@@ -79,7 +86,7 @@ socket.write({"username": "testUser012","name": "testUser012", "pass": "blahblah
 		
 	var params = {
 	host: 'localhost',
-	port: 3000,
+	port: peer.port,
 	path: '/api/v1/users.register',
 	method: 'POST'
 
@@ -113,7 +120,7 @@ req.end();
 
 var login = {
 host: 'localhost',
-	port: 3000,
+	port: peer.port,
 	path: '/api/v1/login',
 	method: 'POST'
 };
@@ -175,7 +182,7 @@ console.log(newheaders);
 
 var sendMessage = {
   host: 'localhost',
-  port: 3000,
+  port: peer.port,
   path: '/api/v1/chat.postMessage',
   method: 'POST',
   headers: newheaders
@@ -205,7 +212,7 @@ sendMessagereq.end();
 //}
 });
 
-// })
+ });
 
 
 });
