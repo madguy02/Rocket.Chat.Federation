@@ -18,6 +18,7 @@ Package.onUse(function(api) {
 	api.use("templating", "client");
 	api.addFiles("Client/federation.html", "client");
 	api.addFiles("Server/client.js","server");
+	api.addFiles("Server/Dns.js","server");
 	api.addFiles("Server/fedmsgserver.js","server");
 	api.addFiles("CLientfedmsgclient.js","client");
 	api.addFiles("Client/style.css","client");
