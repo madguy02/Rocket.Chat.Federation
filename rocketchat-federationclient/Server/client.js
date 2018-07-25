@@ -85,7 +85,7 @@ socket.write({"username": "testUser012","name": "testUser012", "pass": "blahblah
 	console.log(doc);
 		
 	var params = {
-	host: 'localhost',
+	host: peer.host,
 	port: peer.port,
 	path: '/api/v1/users.register',
 	method: 'POST'
@@ -119,7 +119,7 @@ req.end();
 
 
 var login = {
-host: 'localhost',
+	host: peer.host,
 	port: peer.port,
 	path: '/api/v1/login',
 	method: 'POST'
@@ -181,7 +181,7 @@ console.log(newheaders);
 
 
 var sendMessage = {
-  host: 'localhost',
+  host: peer.host,
   port: peer.port,
   path: '/api/v1/chat.postMessage',
   method: 'POST',
