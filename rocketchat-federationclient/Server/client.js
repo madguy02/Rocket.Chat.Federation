@@ -62,13 +62,18 @@ console.log(server.address());
 var client = new net.Socket();
 client.connect(5001, '127.0.0.1', function() {
 console.log('connected this one');
-var disc = discovery();
+var disc = discovery({
+	loopback: false
+});
+disc.announce('new-test', 8181);
 disc.lookup('example');
+disc.lookup('test')
 disc.on('peer', function(name, peer){
 console.log(name);
 console.log(peer);
 //});
-
+// console.log(peer.port);
+// console.log(peer.host);
 swarm.on('connection', function(socket) {
   console.log(peers+'[a peer joined]');
   socket = jsonStream(socket);
@@ -119,7 +124,7 @@ req.end();
 
 
 var login = {
-	host: peer.host,
+host: peer.host,
 	port: peer.port,
 	path: '/api/v1/login',
 	method: 'POST'
